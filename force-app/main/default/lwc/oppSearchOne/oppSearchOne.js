@@ -2,7 +2,7 @@ import { LightningElement, track, wire } from 'lwc';
 import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields';
  
 
-
+//data table columns Label and field assignment from apex class method:ShowOpportunityFields.
 const columns = [
     { label: 'Opportunity Name', fieldName: 'Name' },
     { label: 'Opportunity Description', fieldName: 'Description' },
@@ -14,20 +14,29 @@ const columns = [
 ];
 
 export default class OppSearchOne extends LightningElement {
-    @track opportunityName = '';
-    error;
-     columns = columns;
 
-    @track storedata;
+      @track opportunityName = '';
     
-    @wire(ShowOpportunityFields)
+    columns = columns;
+
+    @track storetabledata; //all Table data controller.
+
+    error; 
+    @wire(ShowOpportunityFields) //get data from apex class method: ShowOpportunityFields.
     wiredResult(result) {
         if (result) {
-            this.storedata = result;
+            this.storetabledata = result;   //store data in: storedata Variable.
         } else if (result.error) {
-            this.storedata = undefined;
+            this.storetabledata = undefined;
         }
     }
+    
+
+
+
+
+
+ }
 
 
    
@@ -39,4 +48,4 @@ export default class OppSearchOne extends LightningElement {
     // handleSearch() {
     //     // The search results are automatically updated by the wire service.
     // }
-}
+
