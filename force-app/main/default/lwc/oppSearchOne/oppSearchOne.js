@@ -1,28 +1,42 @@
 import { LightningElement, track, wire } from 'lwc';
-//import searchOpportunitiesAndContacts from '@salesforce/apex/OpportunityContactSearchController.searchOpportunitiesAndContacts';
+import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields';
  
 
 
 const columns = [
-    { label: 'Opportunity Name', fieldName: 'OpportunityName' },
-    { label: 'Opportunity Description', fieldName: 'OpportunityDescription' },
+    { label: 'Opportunity Name', fieldName: 'Name' },
+    { label: 'Opportunity Description', fieldName: 'Description' },
     { label: 'Close Date', fieldName: 'CloseDate', type: 'date' },
-    { label: 'Account Name', fieldName: 'AccountName' },
-    { label: 'Recent Contact Name', fieldName: 'RecentContactName' },
-    { label: 'Recent Contact Email', fieldName: 'RecentContactEmail' },
-    { label: 'Recent Contact Number', fieldName: 'RecentContactNumber' }
+    { label: 'Account Name', fieldName: 'Account_Name__c' },
+    { label: 'Recent Contact Name', fieldName: 'Recent_Contact_Name__c' },
+    { label: 'Recent Contact Email', fieldName: 'Recent_Contact_Email__c' },
+    { label: 'Recent Contact Number', fieldName: 'Recent_Contact_No__c' }
 ];
 
 export default class OppSearchOne extends LightningElement {
     @track opportunityName = '';
-    //@wire(searchOpportunitiesAndContacts, { opportunityName: '$opportunityName' }) searchResults;
-    columns = columns;
+    error;
+     columns = columns;
 
-    handleOpportunityNameChange(event) {
-        this.opportunityName = event.target.value;
+    @track storedata;
+    
+    @wire(ShowOpportunityFields)
+    wiredResult(result) {
+        if (result) {
+            this.storedata = result;
+        } else if (result.error) {
+            this.storedata = undefined;
+        }
     }
 
-    handleSearch() {
-        // The search results are automatically updated by the wire service.
-    }
+
+   
+
+    // handleOpportunityNameChange(event) {
+    //     this.opportunityName = event.target.value;
+    // }
+
+    // handleSearch() {
+    //     // The search results are automatically updated by the wire service.
+    // }
 }
