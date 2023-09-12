@@ -1,0 +1,31 @@
+<template>
+    <div class="search-container">
+        <lightning-input label="Search" value={searchTerm} onchange={handleSearch}></lightning-input>
+        <table class="slds-table slds-table_bordered slds-table_cell-buffered">
+            <thead>
+                <tr>
+                    <th>Opportunity Name</th>
+                    <th>Opportunity Description</th>
+                    <th>Opportunity Close Date</th>
+                    <th>Associated Account Name</th>
+                    <th>Name of Most Recent Contact</th>
+                    <th>Contact Email</th>
+                    <th>Contact Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={filteredOpportunities} for:item="opp">
+                    <tr key={opp.Id}>
+                        <td>{opp.Name}</td>
+                        <td>{opp.Description__c}</td>
+                        <td>{opp.CloseDate}</td>
+                        <td>{opp.Account.Name}</td>
+                        <td>{opp.MostRecentContact.Name}</td>
+                        <td>{opp.MostRecentContact.Email}</td>
+                        <td>{opp.MostRecentContact.Phone}</td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</template>
