@@ -1,20 +1,28 @@
-import { LightningElement, wire, track } from 'lwc';
-import searchOpportunities from '@salesforce/apex/OpportunityController.searchOpportunities';
+import { LightningElement, track, wire } from 'lwc';
+//import searchOpportunitiesAndContacts from '@salesforce/apex/OpportunityContactSearchController.searchOpportunitiesAndContacts';
+ 
+
+
+const columns = [
+    { label: 'Opportunity Name', fieldName: 'OpportunityName' },
+    { label: 'Opportunity Description', fieldName: 'OpportunityDescription' },
+    { label: 'Close Date', fieldName: 'CloseDate', type: 'date' },
+    { label: 'Account Name', fieldName: 'AccountName' },
+    { label: 'Recent Contact Name', fieldName: 'RecentContactName' },
+    { label: 'Recent Contact Email', fieldName: 'RecentContactEmail' },
+    { label: 'Recent Contact Number', fieldName: 'RecentContactNumber' }
+];
 
 export default class OppSearchOne extends LightningElement {
-    @track searchTerm = '';
-    @track filteredOpportunities = [];
+    @track opportunityName = '';
+    //@wire(searchOpportunitiesAndContacts, { opportunityName: '$opportunityName' }) searchResults;
+    columns = columns;
 
-    handleSearch(event) {
-        this.searchTerm = event.target.value;
+    handleOpportunityNameChange(event) {
+        this.opportunityName = event.target.value;
     }
 
-    @wire(searchOpportunities, { searchTerm: '$searchTerm' })
-    wiredOpportunities({ error, data }) {
-        if (data) {
-            this.filteredOpportunities = data;
-        } else if (error) {
-            // Handle error
-        }
+    handleSearch() {
+        // The search results are automatically updated by the wire service.
     }
 }

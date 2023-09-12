@@ -1,7 +1,11 @@
-.search-container {
-    padding: 1rem;
+.container{
+    display: flex;
+   
+    justify-content: center;
+    margin-left: 20px;
+    margin-bottom: 20px;
 }
-
-.slds-table {
-    width: 100%;
+.button{
+    margin-left: 15px;
+    margin-top: 19px;
 }
