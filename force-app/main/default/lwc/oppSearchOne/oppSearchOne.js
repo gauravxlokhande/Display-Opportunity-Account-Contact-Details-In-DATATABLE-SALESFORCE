@@ -16,7 +16,7 @@ const columns = [
 ];
 
 export default class OppSearchOne extends LightningElement {
-    // Columns assignment
+
     columns = columns; // Assigning the columns defined above to the 'columns' property of this component.
 
     @track storetabledata; // Variable to store table data.
@@ -32,10 +32,12 @@ export default class OppSearchOne extends LightningElement {
         }
     }
 
+
     @track searchTerm = ''; // Variable to hold the search term entered by the user.
     @track opportunities = []; // Array to store the list of opportunities.
 
-    handleSearchTermChange(event) {
+
+    handleSearchvalueChange(event) {
         this.searchTerm = event.target.value; // Updating 'searchTerm' with the value entered by the user.
         this.searchOpportunities(); // Initiating the search for opportunities.
     }
@@ -47,48 +49,51 @@ export default class OppSearchOne extends LightningElement {
         }
 
 
-    searchOpportunities({ searchKey: this.searchTerm })
-    .then(result => {
-        // Use a Set to store unique Opportunity Ids
-        const uniqueOpportunityIds = new Set();
 
-        // Filter the results to include only unique opportunities
-        const uniqueOpportunities = result.filter(opp => {
-            if (!uniqueOpportunityIds.has(opp.Id)) {
-                uniqueOpportunityIds.add(opp.Id);
-                return true;
-            }
-            return false;
-        });
+        searchOpportunities({ searchKey: this.searchTerm })
+            .then(result => {
+                // Use a Set to store unique Opportunity Ids
+                const uniqueOpportunityIds = new Set();
 
-        // Create an array to store promises for masking Account Names
-        const accountNamePromises = uniqueOpportunities.map(opp => {
-            return maskString(opp.Account.Name)
-                .then(maskedName => {
-                    opp.Account.Name = maskedName; // Assign the masked name
-                    return opp; // Return the modified opportunity
-                })
-                .catch(error => {
-                    // Handle errors if necessary
-                    console.error(error);
-                    return opp;
+                // Filter the results to include only unique opportunities
+                const uniqueOpportunities = result.filter(opp => {
+                    if (!uniqueOpportunityIds.has(opp.Id)) {
+                        uniqueOpportunityIds.add(opp.Id);
+                        return true;
+                    }
+                    return false;
                 });
-        });
 
-        // Wait for all promises to resolve
-        return Promise.all(accountNamePromises);
-    })
-    .then(uniqueOpportunities => {
-        // Update opportunities with masked Account Names
-        this.opportunities = uniqueOpportunities;
-        this.error = undefined;
-    })
-    .catch(error => {
-        this.error = error.message || 'An error occurred while searching opportunities.';
-        this.opportunities = [];
-    });
+                // Create an array to store promises for masking Account Names
+                const accountNamePromises = uniqueOpportunities.map(opp => {
+                    return maskString(opp.Account.Name)
+                        .then(maskedName => {
+                            opp.Account.Name = maskedName; // Assign the masked name
+                            return opp; // Return the modified opportunity
+                        })
+                        .catch(error => {
+                            // Handle errors if necessary
+                            console.error(error);
+                            return opp;
+                        });
+                });
 
-  //Gaurav
+                // Wait for all promises to resolve
+                return Promise.all(accountNamePromises);
+            })
+            .then(uniqueOpportunities => {
+                // Filter storetabledata to only include opportunities present in the search results
+                this.opportunities = uniqueOpportunities.filter(opp => {
+                    return this.storetabledata.data.some(data => data.Id === opp.Id);
+                });
+
+                this.error = undefined;
+            })
+            .catch(error => {
+                this.error = error.message || 'An error occurred while searching opportunities.';
+                this.opportunities = [];
+            });
        
+        
     }
 }

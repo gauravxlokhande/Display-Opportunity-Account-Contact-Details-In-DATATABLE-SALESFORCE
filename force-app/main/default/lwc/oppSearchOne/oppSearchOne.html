@@ -5,8 +5,8 @@
         <!-- Search Input -->
         <div class="slds-m-around_medium">
             <lightning-input label="Search Opportunities"
-                placeholder="Search by Opportunity Stage, Account Name or Contact Name "
-                onchange={handleSearchTermChange}>
+                placeholder="Search by Opportunity Stage, Account Name or Contact Name"
+                onchange={handleSearchvalueChange}>
             </lightning-input>
         </div>
 
@@ -25,8 +25,8 @@
         </div>
 
         <!-- Lightning Datatable for Displaying Data -->
-        <lightning-datatable key-field="Id" data={storetabledata.data} columns={columns} draft-values={finditemvalues}
-            show-row-number-column="true" hide-checkbox-column="true">
+        <lightning-datatable key-field="Id" data={storetabledata.data} columns={columns} show-row-number-column="true"
+            hide-checkbox-column="true">
         </lightning-datatable>
 
     </lightning-card>
