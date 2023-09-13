@@ -87,8 +87,6 @@ export default class OppSearchOne extends LightningElement {
         this.error = error.message || 'An error occurred while searching opportunities.';
         this.opportunities = [];
     });
-
-  //Gaurav Lokhande
        
     }
 }
