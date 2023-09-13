@@ -67,6 +67,7 @@ export default class OppSearchOne extends LightningElement {
             Account: {
                 ...opp.Account,
                 Name: maskString(opp.Account.Name)
+               
             }
         }));
 

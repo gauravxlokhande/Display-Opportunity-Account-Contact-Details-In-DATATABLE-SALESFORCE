@@ -14,8 +14,8 @@
             <template for:each={opportunities} for:item="opp">
                 <p key={opp.Id}>
                     Opportunity Name: {opp.Name}<br />
-                    Stage: {opp.StageName}<br />
-                    Account: {opp.Account.Name}
+                    Account: {opp.Account.Name}<br />
+                    Stage: {opp.StageName}
                 </p>
             </template>
             <template if:true={error}>
@@ -24,8 +24,8 @@
         </div>
 
         <!-- Lightning Datatable for Displaying Data -->
-        <lightning-datatable key-field="Id" data={storetabledata.data} columns={columns} onsave={handlesave}
-            draft-values={finditemvalues} show-row-number-column="true" hide-checkbox-column="true">
+        <lightning-datatable key-field="Id" data={storetabledata.data} columns={columns} draft-values={finditemvalues}
+            show-row-number-column="true" hide-checkbox-column="true">
         </lightning-datatable>
 
     </lightning-card>
