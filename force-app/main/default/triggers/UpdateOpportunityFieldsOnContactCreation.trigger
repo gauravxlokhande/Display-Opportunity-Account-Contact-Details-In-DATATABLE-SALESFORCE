@@ -19,7 +19,7 @@ trigger UpdateOpportunityFieldsOnContactCreation on Contact (after insert , afte
         if (accountToContactMap.containsKey(opp.AccountId)) {
             Contact recentContact = accountToContactMap.get(opp.AccountId);
             opp.Account_Name__c = opp.Account.Name;
-            opp.Recent_Contact_Name__c = recentContact.FirstName;
+            opp.Recent_Contact_Name__c = recentContact.FirstName +' '+recentContact.LastName;
             opp.Recent_Contact_No__c = recentContact.Phone;
             opp.Recent_Contact_Email__c = recentContact.Email;
             opportunitiesToUpdate.add(opp);
