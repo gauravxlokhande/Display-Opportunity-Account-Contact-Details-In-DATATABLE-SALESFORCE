@@ -1,99 +1,76 @@
-import { LightningElement, track, wire } from 'lwc'; // Importing necessary Lightning Web Component modules.
+import { LightningElement, wire } from 'lwc';
+import searchOpportunities from '@salesforce/apex/OpportunitySearchController.searchOpportunities';
+import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields'; 
 
-import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields'; // Importing an Apex method to retrieve Opportunity data.
-import searchOpportunities from '@salesforce/apex/OpportunitySearchController.searchOpportunities'; // Importing an Apex method for custom Opportunity search.
-import maskString from '@salesforce/apex/OpportunitySearchController.maskString'; // Importing an Apex method to mask sensitive strings.
-
-// Define data table columns
 const columns = [
-    { label: 'Opportunity Name', fieldName: 'Name' }, 
-    { label: 'Opportunity Description', fieldName: 'Description' }, // Column for Opportunity Description
-    { label: 'Close Date', fieldName: 'CloseDate', type: 'date' }, // Column for Close Date (with date type)
-    { label: 'Account Name', fieldName: 'Account_Name__c' }, // Column for Account Name
-    { label: 'Recent Contact Name', fieldName: 'Recent_Contact_Name__c' }, // Column for Recent Contact Name
-    { label: 'Recent Contact Email', fieldName: 'Recent_Contact_Email__c' }, // Column for Recent Contact Email
-    { label: 'Recent Contact Number', fieldName: 'Recent_Contact_No__c' } // Column for Recent Contact Number
+    { label: 'Opportunity Name', fieldName: 'Name', type: 'text' },
+    { label: 'Opportunity Description', fieldName: 'Description', type: 'text' },
+    { label: 'Opportunity Close Date', fieldName: 'CloseDate', type: 'date' },
+    { label: 'Associated Account Name', fieldName: 'AccountId', type: 'text' },
+    { label: 'Most Recent Contact Name', fieldName: 'Recent_Contact_Name__c', type: 'text' },
+    { label: 'Most Recent Contact Email', fieldName: 'Recent_Contact_Email__c', type: 'email' },
+    { label: 'Most Recent Contact Number', fieldName: 'Recent_Contact_No__c', type: 'phone' }
 ];
 
-export default class OppSearchOne extends LightningElement {
+export default class OpportunitySearch extends LightningElement {
 
-    columns = columns; // Assigning the columns defined above to the 'columns' property of this component.
 
-    @track storetabledata; // Variable to store table data.
-
+    columns = columns;
+    data = [];
     error;
 
-    @wire(ShowOpportunityFields)
+
+     @wire(ShowOpportunityFields)
     wiredResult(result) {
         if (result) {
-            this.storetabledata = result; // Assigning data retrieved from the Apex method to 'storetabledata'.
+            this.data = result; // Assigning data retrieved from the Apex method to 'storetabledata'.
         } else if (result.error) {
-            this.storetabledata = undefined; // Handling any errors by setting 'storetabledata' to undefined.
+            this.data = undefined; // Handling any errors by setting 'storetabledata' to undefined.
         }
     }
 
 
-    @track searchTerm = ''; // Variable to hold the search term entered by the user.
-    @track opportunities = []; // Array to store the list of opportunities.
 
 
-    handleSearchvalueChange(event) {
-        this.searchTerm = event.target.value; // Updating 'searchTerm' with the value entered by the user.
-        this.searchOpportunities(); // Initiating the search for opportunities.
+    handleSearchTermChange(event) {
+        const searchTerm = event.target.value;
+        this.searchOpportunities(searchTerm);
     }
 
-    searchOpportunities() {
-        if (this.searchTerm.length < 3) { // Checking if the search term is less than 3 characters.
-            this.opportunities = []; // If so, clearing the list of opportunities.
-            return;
-        }
-
-
-
-        searchOpportunities({ searchKey: this.searchTerm })
+    searchOpportunities(searchTerm) {
+        searchOpportunities({ searchKey: searchTerm })
             .then(result => {
-                // Use a Set to store unique Opportunity Ids
-                const uniqueOpportunityIds = new Set();
-
-                // Filter the results to include only unique opportunities
-                const uniqueOpportunities = result.filter(opp => {
-                    if (!uniqueOpportunityIds.has(opp.Id)) {
-                        uniqueOpportunityIds.add(opp.Id);
-                        return true;
-                    }
-                    return false;
-                });
-
-                // Create an array to store promises for masking Account Names
-                const accountNamePromises = uniqueOpportunities.map(opp => {
-                    return maskString(opp.Account.Name)
-                        .then(maskedName => {
-                            opp.Account.Name = maskedName; // Assign the masked name
-                            return opp; // Return the modified opportunity
-                        })
-                        .catch(error => {
-                            // Handle errors if necessary
-                            console.error(error);
-                            return opp;
-                        });
-                });
-
-                // Wait for all promises to resolve
-                return Promise.all(accountNamePromises);
-            })
-            .then(uniqueOpportunities => {
-                // Filter storetabledata to only include opportunities present in the search results
-                this.opportunities = uniqueOpportunities.filter(opp => {
-                    return this.storetabledata.data.some(data => data.Id === opp.Id);
-                });
-
+                // Mask sensitive information
+                this.data = result.map(item => ({
+                    ...item,
+                    Recent_Contact_Email__c: this.maskEmail(item.Recent_Contact_Email__c),
+                    Recent_Contact_No__c: this.maskPhoneNumber(item.Recent_Contact_No__c)
+                }));
                 this.error = undefined;
             })
             .catch(error => {
                 this.error = error.message || 'An error occurred while searching opportunities.';
-                this.opportunities = [];
+                this.data = [];
             });
-       
-        
+    }
+
+    maskEmail(email) {
+        // Mask email with the first three characters visible
+        if (email) {
+            const atIndex = email.indexOf('@');
+            if (atIndex >= 3) {
+                const maskedPart = email.substring(0, atIndex - 3) + '***';
+                return maskedPart + email.substring(atIndex);
+            }
+        }
+        return email;
+    }
+
+    maskPhoneNumber(phoneNumber) {
+        // Mask phone number with the first three digits visible
+        if (phoneNumber && phoneNumber.length >= 3) {
+            return '***' + phoneNumber.substring(3);
+        }
+        return phoneNumber;
     }
 }
