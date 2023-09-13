@@ -6,7 +6,7 @@ import maskString from '@salesforce/apex/OpportunitySearchController.maskString'
 
 // Define data table columns
 const columns = [
-    { label: 'Opportunity Name', fieldName: 'Name' }, // Column for Opportunity Name
+    { label: 'Opportunity Name', fieldName: 'Name' }, 
     { label: 'Opportunity Description', fieldName: 'Description' }, // Column for Opportunity Description
     { label: 'Close Date', fieldName: 'CloseDate', type: 'date' }, // Column for Close Date (with date type)
     { label: 'Account Name', fieldName: 'Account_Name__c' }, // Column for Account Name
@@ -61,22 +61,33 @@ export default class OppSearchOne extends LightningElement {
             return false;
         });
 
-        // Mask sensitive information and update opportunities
-        this.opportunities = uniqueOpportunities.map(opp => ({
-            ...opp,
-            Account: {
-                ...opp.Account,
-                Name: maskString(opp.Account.Name)
-               
-            }
-        }));
+        // Create an array to store promises for masking Account Names
+        const accountNamePromises = uniqueOpportunities.map(opp => {
+            return maskString(opp.Account.Name)
+                .then(maskedName => {
+                    opp.Account.Name = maskedName; // Assign the masked name
+                    return opp; // Return the modified opportunity
+                })
+                .catch(error => {
+                    // Handle errors if necessary
+                    console.error(error);
+                    return opp;
+                });
+        });
 
+        // Wait for all promises to resolve
+        return Promise.all(accountNamePromises);
+    })
+    .then(uniqueOpportunities => {
+        // Update opportunities with masked Account Names
+        this.opportunities = uniqueOpportunities;
         this.error = undefined;
     })
     .catch(error => {
         this.error = error.message || 'An error occurred while searching opportunities.';
         this.opportunities = [];
     });
+
 
        
     }
