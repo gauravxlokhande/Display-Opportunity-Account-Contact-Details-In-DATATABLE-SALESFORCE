@@ -1,76 +1,55 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
+import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields';
 import searchOpportunities from '@salesforce/apex/OpportunitySearchController.searchOpportunities';
-import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields'; 
+import maskString from '@salesforce/apex/OpportunitySearchController.maskString';
 
-const columns = [
-    { label: 'Opportunity Name', fieldName: 'Name', type: 'text' },
-    { label: 'Opportunity Description', fieldName: 'Description', type: 'text' },
-    { label: 'Opportunity Close Date', fieldName: 'CloseDate', type: 'date' },
-    { label: 'Associated Account Name', fieldName: 'AccountId', type: 'text' },
-    { label: 'Most Recent Contact Name', fieldName: 'Recent_Contact_Name__c', type: 'text' },
-    { label: 'Most Recent Contact Email', fieldName: 'Recent_Contact_Email__c', type: 'email' },
-    { label: 'Most Recent Contact Number', fieldName: 'Recent_Contact_No__c', type: 'phone' }
-];
+export default class OppSearchOne extends LightningElement {
+    @track opportunities = [];
+    @track error;
 
-export default class OpportunitySearch extends LightningElement {
-
-
-    columns = columns;
-    data = [];
-    error;
-
-
-     @wire(ShowOpportunityFields)
-    wiredResult(result) {
-        if (result) {
-            this.data = result; // Assigning data retrieved from the Apex method to 'storetabledata'.
-        } else if (result.error) {
-            this.data = undefined; // Handling any errors by setting 'storetabledata' to undefined.
-        }
-    }
-
-
-
+    // Define columns with field names matching the results from searchOpportunities
+    columns = [
+        { label: 'Opportunity Name', fieldName: 'Name' },
+        { label: 'Opportunity Description', fieldName: 'Description' },
+        { label: 'Close Date', fieldName: 'CloseDate', type: 'date' },
+        { label: 'Account Name', fieldName: 'AccountName' }, // Adjust field name to match search results
+        { label: 'Recent Contact Name', fieldName: 'RecentContactName' }, // Adjust field name
+        { label: 'Recent Contact Email', fieldName: 'RecentContactEmail' }, // Adjust field name
+        { label: 'Recent Contact Number', fieldName: 'RecentContactNumber' } // Adjust field name
+    ];
 
     handleSearchTermChange(event) {
-        const searchTerm = event.target.value;
-        this.searchOpportunities(searchTerm);
+        this.searchTerm = event.target.value;
+        this.searchOpportunities();
     }
 
-    searchOpportunities(searchTerm) {
-        searchOpportunities({ searchKey: searchTerm })
-            .then(result => {
-                // Mask sensitive information
-                this.data = result.map(item => ({
-                    ...item,
-                    Recent_Contact_Email__c: this.maskEmail(item.Recent_Contact_Email__c),
-                    Recent_Contact_No__c: this.maskPhoneNumber(item.Recent_Contact_No__c)
-                }));
+    searchOpportunities() {
+        if (this.searchTerm.length < 3) {
+            this.opportunities = [];
+            return;
+        }
+
+        searchOpportunities({ searchKey: this.searchTerm })
+            .then((result) => {
+                // Use a Set to store unique Opportunity Ids
+                const uniqueOpportunityIds = new Set();
+                const uniqueOpportunities = [];
+
+                // Filter out duplicates based on Opportunity Id
+                result.forEach((opp) => {
+                    if (!uniqueOpportunityIds.has(opp.Id)) {
+                        uniqueOpportunityIds.add(opp.Id);
+                        uniqueOpportunities.push(opp);
+                    }
+                });
+
+                this.opportunities = uniqueOpportunities;
                 this.error = undefined;
             })
-            .catch(error => {
-                this.error = error.message || 'An error occurred while searching opportunities.';
-                this.data = [];
+            .catch((error) => {
+                this.error =
+                    error.message || 'An error occurred while searching opportunities.';
+                this.opportunities = [];
             });
-    }
-
-    maskEmail(email) {
-        // Mask email with the first three characters visible
-        if (email) {
-            const atIndex = email.indexOf('@');
-            if (atIndex >= 3) {
-                const maskedPart = email.substring(0, atIndex - 3) + '***';
-                return maskedPart + email.substring(atIndex);
-            }
-        }
-        return email;
-    }
-
-    maskPhoneNumber(phoneNumber) {
-        // Mask phone number with the first three digits visible
-        if (phoneNumber && phoneNumber.length >= 3) {
-            return '***' + phoneNumber.substring(3);
-        }
-        return phoneNumber;
     }
 }
