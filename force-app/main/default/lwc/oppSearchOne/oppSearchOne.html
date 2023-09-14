@@ -1,14 +1,19 @@
 <template>
+    <!-- Lightning Card for Opportunity and Contact Search -->
     <lightning-card title="Opportunity and Contact Search">
-        <lightning-input label="Search Opportunities"
-            placeholder="Search by Opportunity Stage, Account Name, or Contact Name" onchange={handleSearchTermChange}>
-        </lightning-input>
 
-        <template if:true={opportunities.length}>
-            <lightning-datatable key-field="Id" data={opportunities} columns={columns} draft-values={finditemvalues}
-                show-row-number-column="true" hide-checkbox-column="true">
-            </lightning-datatable>
-        </template>
+        <!-- Search Input -->
+        <div class="slds-m-around_medium">
+            <lightning-input label="Search Opportunities"
+                placeholder="Search by Opportunity Stage, Account Name or Contact Name "
+                onchange={handleSearchTermChange}>
+            </lightning-input>
+        </div>
+
+        <!-- Lightning Datatable for Displaying Data -->
+        <lightning-datatable key-field="Id" data={filteredData} columns={columns} draft-values={finditemvalues}
+            show-row-number-column="true" hide-checkbox-column="true">
+        </lightning-datatable>
 
         <template if:true={error}>
             <p>{error}</p>

@@ -3,53 +3,52 @@ import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.Sh
 import searchOpportunities from '@salesforce/apex/OpportunitySearchController.searchOpportunities';
 import maskString from '@salesforce/apex/OpportunitySearchController.maskString';
 
+const columns = [
+    { label: 'Opportunity Name', fieldName: 'Name' },
+    { label: 'Opportunity Description', fieldName: 'Description' },
+    { label: 'Close Date', fieldName: 'CloseDate', type: 'date' },
+    { label: 'Account Name', fieldName: 'Account_Name__c' },
+    { label: 'Recent Contact Name', fieldName: 'Recent_Contact_Name__c' },
+    { label: 'Recent Contact Email', fieldName: 'Recent_Contact_Email__c' },
+    { label: 'Recent Contact Number', fieldName: 'Recent_Contact_No__c' }
+];
+
 export default class OppSearchOne extends LightningElement {
-    @track opportunities = [];
-    @track error;
+    columns = columns;
+    @track storetabledata;
+    @track filteredData = [];
+    error;
+    @track searchTerm = '';
 
-    // Define columns with field names matching the results from searchOpportunities
-    columns = [
-        { label: 'Opportunity Name', fieldName: 'Name' },
-        { label: 'Opportunity Description', fieldName: 'Description' },
-        { label: 'Close Date', fieldName: 'CloseDate', type: 'date' },
-        { label: 'Account Name', fieldName: 'AccountName' }, // Adjust field name to match search results
-        { label: 'Recent Contact Name', fieldName: 'RecentContactName' }, // Adjust field name
-        { label: 'Recent Contact Email', fieldName: 'RecentContactEmail' }, // Adjust field name
-        { label: 'Recent Contact Number', fieldName: 'RecentContactNumber' } // Adjust field name
-    ];
-
-    handleSearchTermChange(event) {
-        this.searchTerm = event.target.value;
-        this.searchOpportunities();
+    @wire(ShowOpportunityFields)
+    wiredResult(result) {
+        if (result) {
+            this.storetabledata = result;
+            this.filterData();
+            this.error = undefined;
+        } else if (result.error) {
+            this.storetabledata = undefined;
+            this.filteredData = [];
+            this.error = result.error;
+        }
     }
 
-    searchOpportunities() {
-        if (this.searchTerm.length < 3) {
-            this.opportunities = [];
+    handleSearchTermChange(event) {
+        this.searchTerm = event.target.value.toLowerCase();
+        this.filterData();
+    }
+
+    filterData() {
+        if (!this.storetabledata || !this.storetabledata.data) {
             return;
         }
 
-        searchOpportunities({ searchKey: this.searchTerm })
-            .then((result) => {
-                // Use a Set to store unique Opportunity Ids
-                const uniqueOpportunityIds = new Set();
-                const uniqueOpportunities = [];
-
-                // Filter out duplicates based on Opportunity Id
-                result.forEach((opp) => {
-                    if (!uniqueOpportunityIds.has(opp.Id)) {
-                        uniqueOpportunityIds.add(opp.Id);
-                        uniqueOpportunities.push(opp);
-                    }
-                });
-
-                this.opportunities = uniqueOpportunities;
-                this.error = undefined;
-            })
-            .catch((error) => {
-                this.error =
-                    error.message || 'An error occurred while searching opportunities.';
-                this.opportunities = [];
-            });
+        this.filteredData = this.storetabledata.data.filter(item => {
+            return (
+                item.Name.toLowerCase().includes(this.searchTerm) ||
+                item.Account_Name__c.toLowerCase().includes(this.searchTerm) ||
+                item.Recent_Contact_Name__c.toLowerCase().includes(this.searchTerm)
+            );
+        });
     }
 }
