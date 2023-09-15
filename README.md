@@ -1,18 +1,24 @@
-# Salesforce DX Project: Next Steps
+Display Opportunity, Account and Contact Details:
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+Instructions : 
+Choose either AURA or LWC as per your choice
+Test Class is nice to have
+Please ensure that the code that you have written is project deployable ready. 
+Please ensure relevant information like what settings are required for the assignment to work. 
+We advise you to make assumptions if anything is not clear, however please clearly state any assumptions you would have made upfront in the beginning of the interview.
 
-## How Do You Plan to Deploy Your Changes?
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+Scenario:
+The customer wants to have the ability to search for opportunities and contacts in a custom manner. As part of the search table, the customer expects the below fields:
+Opportunity Name (Text)
+Opportunity Description  (Text)
+Opportunity Close Date (Date)
+Associated Account Name  (Text)
+Name of most Recent Contact associated to Opportunity’s Account (Text)
+Contact Email of most Recent created Contact associated to Opportunity’s Account (Text)
+Contact Number of most Recent created Contact associated to Opportunity’s Account (Phone Number)
 
-## Configure Your Salesforce DX Project
+The customer is expecting the following functionality:
+Create a Search box at top of the table to search through the Opportunity Stage, Account Name or Contact Name and filter result on basis of input value.
+If there is any record which is not visible to the user then the contents of the same should be masked with just the first three characters viewable to the end users. 
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
-
-## Read All About It
-
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
