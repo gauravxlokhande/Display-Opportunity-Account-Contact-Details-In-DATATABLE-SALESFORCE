@@ -1,7 +1,6 @@
 import { LightningElement, track, wire } from 'lwc';
 import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields';
-import searchOpportunities from '@salesforce/apex/OpportunitySearchController.searchOpportunities';
-import maskString from '@salesforce/apex/OpportunitySearchController.maskString';
+
 
 const columns = [
     { label: 'Opportunity Name', fieldName: 'Name' },
