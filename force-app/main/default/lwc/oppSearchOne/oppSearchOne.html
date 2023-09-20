@@ -1,3 +1,4 @@
+<!-- oppSearchOne.html -->
 <template>
     <!-- Lightning Card for Opportunity and Contact Search -->
     <lightning-card title="Opportunity and Contact Search">
@@ -5,14 +6,13 @@
         <!-- Search Input -->
         <div class="slds-m-around_medium">
             <lightning-input label="Search Opportunities"
-                placeholder="Search by Opportunity Stage, Account Name or Contact Name "
+                placeholder="Search by Opportunity Stage, Account Name, or Contact Name"
                 onchange={handleSearchTermChange}>
             </lightning-input>
         </div>
 
         <!-- Lightning Datatable for Displaying Data -->
-        <lightning-datatable key-field="Id" data={filteredData} columns={columns} draft-values={finditemvalues}
-            show-row-number-column="true" hide-checkbox-column="true">
+        <lightning-datatable key-field="Id" data={filteredData} columns={columns} onrowaction={handleRowAction}>
         </lightning-datatable>
 
         <template if:true={error}>
