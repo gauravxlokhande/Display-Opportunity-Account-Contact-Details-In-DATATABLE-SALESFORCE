@@ -1,3 +1,4 @@
+<!-- oppSearchOne.html -->
 <template>
     <!-- Lightning Card for Opportunity and Contact Search -->
     <lightning-card title="Opportunity and Contact Search">
@@ -5,15 +6,40 @@
         <!-- Search Input -->
         <div class="slds-m-around_medium">
             <lightning-input label="Search Opportunities"
-                placeholder="Search by Opportunity Stage, Account Name or Contact Name "
+                placeholder="Search by Opportunity Stage, Account Name, or Contact Name"
                 onchange={handleSearchTermChange}>
             </lightning-input>
         </div>
 
-        <!-- Lightning Datatable for Displaying Data -->
-        <lightning-datatable key-field="Id" data={filteredData} columns={columns} draft-values={finditemvalues}
-            show-row-number-column="true" hide-checkbox-column="true">
-        </lightning-datatable>
+        <!-- Custom Datatable for Displaying Data -->
+        <div class="slds-m-around_medium custom-datatable">
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                <thead>
+                    <tr>
+                        <th scope="col">Opportunity Name</th>
+                        <th scope="col">Opportunity Description</th>
+                        <th scope="col">Close Date</th>
+                        <th scope="col">Account Name</th>
+                        <th scope="col">Recent Contact Name</th>
+                        <th scope="col">Recent Contact Email</th>
+                        <th scope="col">Recent Contact Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={filteredData} for:item="item" key={item.Id}>
+                        <tr key={item.Id} onclick={navigateToOpportunity} data-id={item.Id}>
+                            <td style="color: rgb(25, 102, 218);">{item.Name}</td>
+                            <td>{item.Description}</td>
+                            <td>{item.CloseDate}</td>
+                            <td>{item.AccountName}</td>
+                            <td>{item.Recent_Contact_Name__c}</td>
+                            <td>{item.Recent_Contact_Email__c}</td>
+                            <td>{item.Recent_Contact_No__c}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
 
         <template if:true={error}>
             <p>{error}</p>

@@ -1,19 +1,9 @@
+// oppSearchOne.js
 import { LightningElement, track, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import ShowOpportunityFields from '@salesforce/apex/OpportunityDataController.ShowOpportunityFields';
 
-
-const columns = [
-    { label: 'Opportunity Name', fieldName: 'Name' },
-    { label: 'Opportunity Description', fieldName: 'Description' },
-    { label: 'Close Date', fieldName: 'CloseDate', type: 'date' },
-    { label: 'Account Name', fieldName: 'Account_Name__c' },
-    { label: 'Recent Contact Name', fieldName: 'Recent_Contact_Name__c' },
-    { label: 'Recent Contact Email', fieldName: 'Recent_Contact_Email__c' },
-    { label: 'Recent Contact Number', fieldName: 'Recent_Contact_No__c' }
-];
-
-export default class OppSearchOne extends LightningElement {
-    columns = columns;
+export default class OppSearchOne extends NavigationMixin(LightningElement) {
     @track storetabledata;
     @track filteredData = [];
     error;
@@ -21,8 +11,11 @@ export default class OppSearchOne extends LightningElement {
 
     @wire(ShowOpportunityFields)
     wiredResult(result) {
-        if (result) {
-            this.storetabledata = result;
+        if (result.data) {
+            this.storetabledata = result.data.map(oppdata => ({
+                ...oppdata,
+                AccountName: oppdata.Account.Name
+            }));
             this.filterData();
             this.error = undefined;
         } else if (result.error) {
@@ -38,16 +31,28 @@ export default class OppSearchOne extends LightningElement {
     }
 
     filterData() {
-        if (!this.storetabledata || !this.storetabledata.data) {
+        if (!this.storetabledata || this.storetabledata.length === 0) {
             return;
         }
 
-        this.filteredData = this.storetabledata.data.filter(item => {
+        this.filteredData = this.storetabledata.filter(item => {
             return (
                 item.Name.toLowerCase().includes(this.searchTerm) ||
-                item.Account_Name__c.toLowerCase().includes(this.searchTerm) ||
+                item.AccountName.toLowerCase().includes(this.searchTerm) ||
                 item.Recent_Contact_Name__c.toLowerCase().includes(this.searchTerm)
             );
+        });
+    }
+
+    navigateToOpportunity(event) {
+        const recordId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: recordId,
+                objectApiName: 'Opportunity',
+                actionName: 'view',
+            },
         });
     }
 }
